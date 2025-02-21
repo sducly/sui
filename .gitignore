@@ -1,0 +1,7 @@
+front/node_modules
+*.pyc
+node_modules
+ollama
+*.db
+output_json
+reminders.db

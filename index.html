@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Sui le petit slime</title>
+    <style>
+      body {
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+        margin: 0;
+      }
+
+      #sui-container {
+        flex: 1;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      #chat-container {
+        padding: 10px;
+        border-top: 1px solid #ccc;
+      }
+
+      #messages {
+        height: 200px;
+        overflow-y: scroll;
+      }
+
+      #input-area {
+        display: flex;
+      }
+
+      #message-input {
+        flex: 1;
+        padding: 5px;
+      }
+
+      #send-button {
+        padding: 5px 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="sui-container">
+      <div id="sui-canvas"></div>
+    </div>
+    <div id="chat-container">
+      <div id="messages"></div>
+      <div id="input-area">
+        <input type="text" id="message-input" />
+        <button id="send-button">Envoyer</button>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/three@latest/build/three.min.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>

@@ -1,0 +1,23 @@
+version: "3.8"
+services:
+  app:
+    build: ./docker
+    container_name: sui
+    ports:
+      - 11434:11434
+      - 8765:8765
+    volumes:
+      - sui:/root/.ollama
+      - .:/app
+    working_dir: /app
+    command: ollama serve
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+
+volumes:
+  sui:

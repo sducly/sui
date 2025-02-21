@@ -1,0 +1,10 @@
+asyncio
+requests
+websockets
+apscheduler
+mediapipe
+coqui-tts
+ollama
+torch 
+whisperx
+phonemizer
