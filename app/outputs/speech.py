@@ -74,6 +74,6 @@ async def speak(text):
     os.remove(temp_audio_path)
 
     return {
-        "phonemes": visemes_with_times,
+        "phonemes": {"mouthCues": visemes_with_times},
         "audio": audio_data
     }
