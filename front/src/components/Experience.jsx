@@ -7,6 +7,7 @@ import {
 import { Suspense, useEffect, useRef, useState } from "react";
 import { useChat } from "../hooks/useChat";
 import { Avatar } from "./Avatar";
+import { SpeechBubble } from "./SpeechBubble";
 
 const Dots = (props) => {
   const { loading } = useChat();
@@ -39,7 +40,7 @@ const Dots = (props) => {
 
 export const Experience = () => {
   const cameraControls = useRef();
-  const { cameraZoomed } = useChat();
+  const { cameraZoomed, through } = useChat();
 
   useEffect(() => {
     cameraControls.current.setLookAt(0, 2, 5, 0, 1.5, 0);
@@ -52,14 +53,20 @@ export const Experience = () => {
       cameraControls.current.setLookAt(0, 2.2, 5, 0, 1.0, 0, true);
     }
   }, [cameraZoomed]);
+
   return (
     <>
       <CameraControls ref={cameraControls} />
       <Environment preset="sunset" />
-      {/* Wrapping Dots into Suspense to prevent Blink when Troika/Font is loaded */}
       <Suspense>
         <Dots position-y={1.75} position-x={-0.02} />
       </Suspense>
+      {through && (
+        <Suspense>
+          <SpeechBubble text={through} />
+        </Suspense>
+      )}
+
       <Avatar />
       <ContactShadows opacity={0.7} />
     </>
