@@ -1,95 +1,45 @@
-import inspect
-from typing import Any, Dict
-import re
+from typing import TypedDict, Literal, List
+import json
 
-def parse_description(docstring: str | None) -> str:
-    """
-    Parse a function's docstring to extract the description.
+def clip_history(history: str, max_chars: int = 8000) -> str:
+    if len(history) > max_chars:
+        return history[-max_chars:]
+    return history
 
-    Args:
-        docstring (str): The docstring to parse.
+class ToolState(TypedDict):
+    history: str
+    use_tool: bool
+    tool_exec: str
+    tools_list: str
 
-    Returns:
-        str: The description.
-    """
+def get_executor(tools: List):
+    def ToolExecutor(state: ToolState) -> ToolState:
+        if not state["tool_exec"]:
+            raise ValueError("No tool_exec data available to execute.")
+        choice = json.loads(state["tool_exec"])
 
-    if not docstring:
-        return ""
+        if "function" not in choice:
+            state["history"] += f"\nToolExecutor: 'function' manquant dans {state['tool_exec']}"
+            state["use_tool"] = False
+            state["tool_exec"] = ""
+            return state
+        
+        tool_name = choice["function"]
+        args = choice["args"]
+        
+        tool = next((t for t in tools if t.name == tool_name), None)
 
-    lines = [line.strip() for line in docstring.strip().split("\n")]
-    description_lines: list[str] = []
-
-    for line in lines:
-        if re.match(r":param", line) or re.match(r":return", line):
-            break
-
-        description_lines.append(line)
-
-    return "\n".join(description_lines)
-
-
-def parse_docstring(docstring):
-    """
-    Parse a function's docstring to extract parameter descriptions in reST format.
-
-    Args:
-        docstring (str): The docstring to parse.
-
-    Returns:
-        dict: A dictionary where keys are parameter names and values are descriptions.
-    """
-    if not docstring:
-        return {}
-
-    # Regex to match `:param name: description` format
-    param_pattern = re.compile(r":param (\w+):\s*(.+)")
-    param_descriptions = {}
-
-    for line in docstring.splitlines():
-        match = param_pattern.match(line.strip())
-        if not match:
-            continue
-        param_name, param_description = match.groups()
-        if param_name.startswith("__"):
-            continue
-        param_descriptions[param_name] = param_description
-
-    return param_descriptions
-
-def function_to_dict(func: callable) -> Dict[str, Any]:
-    """Convertit une fonction en un dictionnaire au format OpenWebUI."""
-
-    docstring = func.__doc__
-    description = parse_description(docstring)
-    param_descriptions = parse_docstring(docstring)
-    signature = inspect.signature(func)
-    parameters = signature.parameters
-
-    spec = {
-        "name": func.__name__,
-        "description": description,
-        "parameters": {
-            "type": "object",
-            "properties": {},
-            "required": []
-        }
-    }
-
-    for name, param in parameters.items():
-        if name == "__id__" or name == "__user__" or name == "request": # Paramètres spéciaux à ignorer
-            continue
-
-        param_type = type(param.default).__name__ if param.default is not param.empty else "string" # Type par défaut: string
-        description = param_descriptions.get(name, "")
-
-        spec["parameters"]["properties"][name] = {
-            "type": param_type,
-            "description": description
-        }
-        if param.default is param.empty: # Paramètre requis
-            spec["parameters"]["required"].append(name)
-
-    return {
-        "callable": func,
-        "spec": spec
-    }
+        if not tool:
+            state["history"] += f"\nTool {tool_name} not found."
+            state["use_tool"] = False
+            state["tool_exec"] = ""
+            return state
+        
+        result = tool.func(*args)
+        state["history"] += f"\nExecuted {tool_name} with result: {result}"
+        state["history"] = clip_history(state["history"])
+        state["use_tool"] = False
+        state["tool_exec"] = ""
+        return state
+    
+    return ToolExecutor

@@ -177,7 +177,7 @@ let setupMode = false;
 
 export function Avatar(props) {
   const { nodes, materials, scene } = useGLTF(
-    "/models/64f1a714fe61576b46f27ca2.glb"
+    "/models/67b8e0aa7c673862f4bec0d4.glb"
   );
 
   const { message, onMessagePlayed, chat } = useChat();
@@ -185,13 +185,15 @@ export function Avatar(props) {
   const [lipsync, setLipsync] = useState();
 
   useEffect(() => {
-    console.log(message);
     if (!message) {
       setAnimation("Idle");
       return;
     }
     setAnimation(message.animation);
     setFacialExpression(message.facialExpression);
+    if (!message.lipsync) {
+      return;
+    }
     setLipsync(message.lipsync);
     const audio = new Audio("data:audio/mp3;base64," + message.audio);
     audio.play();
@@ -333,7 +335,6 @@ export function Avatar(props) {
           emotionValues[key] = value;
         }
       });
-      console.log(JSON.stringify(emotionValues, null, 2));
     }),
   });
 
@@ -444,5 +445,5 @@ export function Avatar(props) {
   );
 }
 
-useGLTF.preload("/models/64f1a714fe61576b46f27ca2.glb");
+useGLTF.preload("/models/67b8e0aa7c673862f4bec0d4.glb");
 useGLTF.preload("/models/animations.glb");

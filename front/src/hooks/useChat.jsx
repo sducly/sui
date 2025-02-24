@@ -5,20 +5,38 @@ const socket = new WebSocket("ws://127.0.0.1:8765");
 const ChatContext = createContext();
 
 export const ChatProvider = ({ children }) => {
+  const [messages, setMessages] = useState([]);
+  const [message, setMessage] = useState();
+  const [through, setThrough] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [cameraZoomed, setCameraZoomed] = useState(true);
+
   const chat = async (message) => {
     setLoading(true);
     socket.send(JSON.stringify({ message }));
   };
 
   socket.onmessage = (event) => {
-    const newMessage = JSON.parse(event.data);
-    setMessages((messages) => [...messages, newMessage]);
-    setLoading(false);
+    const { type, ...message } = JSON.parse(event.data);
+    switch (type) {
+      case "tool":
+        console.log("Action called : " + message.tool);
+        console.log("Used Params : " + message.tool_input);
+        return;
+      case "thought":
+        setThrough(message.message);
+        return;
+      case "animation":
+        setMessages((messages) => [...messages, message]);
+        return;
+      default:
+        setThrough("");
+        setLoading(false);
+        setMessages([message]);
+        return;
+    }
   };
-  const [messages, setMessages] = useState([]);
-  const [message, setMessage] = useState();
-  const [loading, setLoading] = useState(false);
-  const [cameraZoomed, setCameraZoomed] = useState(true);
+
   const onMessagePlayed = () => {
     setMessages((messages) => messages.slice(1));
   };
@@ -40,6 +58,7 @@ export const ChatProvider = ({ children }) => {
         loading,
         cameraZoomed,
         setCameraZoomed,
+        through,
       }}
     >
       {children}
