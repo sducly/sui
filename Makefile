@@ -1,6 +1,8 @@
 init:
 	docker-compose up --build -d
 	docker-compose exec app ollama pull phi4
+	docker-compose exec app ollama pull ollama run gemma3:12b
+	docker-compose exec app ollama pull ollama run gemma3:27b
 	docker-compose exec app ollama create sui -f ./Models/Sui
 	docker-compose exec app ollama create functions -f ./Models/Functions
 	

@@ -8,3 +8,9 @@ ollama
 torch 
 whisperx
 phonemizer
+langchain
+langchain-community 
+langchain-core
+langchain-ollama
+edge_tts
+langgraph
